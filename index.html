@@ -54,8 +54,8 @@
         .btn-glow { transition: all 0.3s ease; }
         .btn-glow:hover:not(:disabled) { box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); transform: translateY(-2px); }
 
-        /* The dodging No button */
-        #noBtn { transition: all 0.2s ease-in-out; z-index: 100; }
+        /* Smoother, faster transition for running away */
+        #noBtn { transition: top 0.15s ease-out, left 0.15s ease-out; z-index: 9999; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4 relative min-h-screen">
@@ -137,24 +137,37 @@
     <div class="fixed bottom-3 right-3 text-2xl opacity-20 hover:opacity-100 cursor-pointer p-2 z-50" onclick="openAdmin()">🔒</div>
 
     <script>
-        // PRANK LOGIC - The "No" button runs away
+        // PRANK LOGIC - The "No" button physically runs away
         const noBtn = document.getElementById('noBtn');
         
         function moveNoButton() {
-            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
-            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+            // Get viewport dimensions
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
             
+            // Get button dimensions
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            
+            // Calculate safe boundaries so it doesn't go off screen
+            const maxX = viewportWidth - btnWidth - 20; 
+            const maxY = viewportHeight - btnHeight - 20;
+            
+            // Generate random position within safe bounds
             const randomX = Math.max(10, Math.floor(Math.random() * maxX));
             const randomY = Math.max(10, Math.floor(Math.random() * maxY));
             
+            // Apply new position
             noBtn.style.position = 'fixed';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
         }
 
-        noBtn.addEventListener('mouseover', moveNoButton);
-        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNoButton(); });
+        // Trigger on both mouse over and click (for fast clickers)
+        noBtn.addEventListener('mouseenter', moveNoButton);
         noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNoButton(); });
+        // For mobile/touch users
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNoButton(); });
 
         function acceptDate() {
             document.getElementById('prankScreen').classList.add('hidden');
@@ -282,11 +295,8 @@
             const dateObj = new Date(selection.date);
             const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Using plain text string so Web3Forms shows it in the "Message" column in the dashboard
-            const plainTextMessage = `Activity: ${selection.activity}
-Details/Location: ${selection.detail}
-Date: ${formattedDate}
-Time: ${selection.time}`;
+            // Using plain text string so Web3Forms shows it perfectly
+            const plainTextMessage = `Activity: ${selection.activity}\nDetails/Location: ${selection.detail}\nDate: ${formattedDate}\nTime: ${selection.time}`;
 
             const payload = {
                 access_key: accessKey,
