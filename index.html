@@ -8,73 +8,113 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
+        /* Animated Gradient Background */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #fce7f3 0%, #fee2e2 100%);
+            background: linear-gradient(-45deg, #fce7f3, #fee2e2, #fbcfe8, #ffedd5);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
             min-height: 100vh;
             overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="%23f472b6" stroke="%23ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'), auto;
         }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .font-cursive { font-family: 'Dancing Script', cursive; }
-        .card { transition: all 0.3s ease; }
-        .card.selected { border-color: #f472b6; background-color: #fdf2f8; transform: scale(1.05); }
+        
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(255, 182, 193, 0.3);
+        }
+
+        .card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(244, 114, 182, 0.2); }
+        .card.selected { border-color: #f472b6; background-color: rgba(253, 242, 248, 0.9); transform: scale(1.05); box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
+        
         .hidden { display: none; }
+        
+        /* Floating Emojis */
         .heart { position: fixed; font-size: 1.5rem; animation: floatUp 4s linear forwards; pointer-events: none; z-index: 50;}
         @keyframes floatUp {
-            0% { transform: translateY(100vh) scale(0); opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+            0% { transform: translateY(100vh) scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5) rotate(20deg); opacity: 0; }
+        }
+        
+        /* Custom Button Glow */
+        .btn-glow {
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.6);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body class="flex items-center justify-center p-4 relative">
 
     <!-- MAIN APP -->
-    <div id="mainApp" class="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-md my-8 border border-white relative z-10">
-        <h1 class="text-4xl font-cursive text-pink-500 text-center mb-2">Our Perfect Date</h1>
-        <p class="text-center text-gray-500 text-sm mb-6">Design our next adventure together ✨</p>
+    <div id="mainApp" class="glass-card p-8 rounded-3xl w-full max-w-md my-8 relative z-10 transition-all duration-500">
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-cursive text-pink-600 mb-1 tracking-wide">Our Perfect Date</h1>
+            <p class="text-gray-600 text-sm font-medium">Hello beautiful! Design our next adventure together ✨</p>
+        </div>
 
         <!-- Step 1: Activity -->
         <div class="mb-6">
-            <h2 class="text-sm font-semibold text-pink-600 mb-3 uppercase tracking-wider">1. What are we doing?</h2>
+            <h2 class="text-xs font-bold text-pink-500 mb-3 uppercase tracking-widest flex items-center gap-2">
+                <span class="w-4 h-[1px] bg-pink-400"></span> 1. What are we doing? <span class="w-4 h-[1px] bg-pink-400"></span>
+            </h2>
             <div class="grid grid-cols-2 gap-3">
-                <div onclick="selectActivity('Rides')" id="act-Rides" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
-                    <div class="text-2xl mb-1">🛵</div><div class="text-sm font-medium">Rides</div>
+                <div onclick="selectActivity('Rides')" id="act-Rides" class="card border-2 border-transparent bg-white/80 p-4 rounded-2xl cursor-pointer text-center">
+                    <div class="text-3xl mb-2 hover:animate-bounce">🛵</div><div class="text-sm font-semibold text-gray-700">Rides</div>
                 </div>
-                <div onclick="selectActivity('Overnight')" id="act-Overnight" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
-                    <div class="text-2xl mb-1">🌙</div><div class="text-sm font-medium">Overnight</div>
+                <div onclick="selectActivity('Overnight')" id="act-Overnight" class="card border-2 border-transparent bg-white/80 p-4 rounded-2xl cursor-pointer text-center">
+                    <div class="text-3xl mb-2 hover:animate-pulse">🌙</div><div class="text-sm font-semibold text-gray-700">Overnight</div>
                 </div>
-                <div onclick="selectActivity('Visit')" id="act-Visit" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
-                    <div class="text-2xl mb-1">🏠</div><div class="text-sm font-medium">Visit</div>
+                <div onclick="selectActivity('Visit')" id="act-Visit" class="card border-2 border-transparent bg-white/80 p-4 rounded-2xl cursor-pointer text-center">
+                    <div class="text-3xl mb-2 hover:animate-bounce">🏠</div><div class="text-sm font-semibold text-gray-700">Visit</div>
                 </div>
-                <div onclick="selectActivity('Eat')" id="act-Eat" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
-                    <div class="text-2xl mb-1">🍽️</div><div class="text-sm font-medium">Eat</div>
+                <div onclick="selectActivity('Eat')" id="act-Eat" class="card border-2 border-transparent bg-white/80 p-4 rounded-2xl cursor-pointer text-center">
+                    <div class="text-3xl mb-2 hover:animate-pulse">🍽️</div><div class="text-sm font-semibold text-gray-700">Eat</div>
                 </div>
             </div>
         </div>
 
-        <div id="dynamicSection" class="hidden mb-6 bg-white p-4 rounded-xl border border-pink-100 shadow-sm"></div>
+        <!-- Dynamic Sections -->
+        <div id="dynamicSection" class="hidden mb-6 bg-white/70 p-5 rounded-2xl border border-pink-200 shadow-inner transition-all duration-300"></div>
 
-        <div id="dateTimeSection" class="hidden mb-8 grid grid-cols-2 gap-4">
+        <!-- Date & Time -->
+        <div id="dateTimeSection" class="hidden mb-8 grid grid-cols-2 gap-4 transition-all duration-300">
             <div>
-                <label class="text-xs font-semibold text-gray-500 uppercase">Date</label>
-                <input type="date" id="dateInput" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:border-pink-400 text-sm">
+                <label class="text-xs font-bold text-pink-500 uppercase tracking-wide">Date</label>
+                <input type="date" id="dateInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent text-sm bg-white/90">
             </div>
             <div>
-                <label id="timeLabel" class="text-xs font-semibold text-gray-500 uppercase">Time</label>
-                <input type="time" id="timeInput" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:border-pink-400 text-sm">
+                <label id="timeLabel" class="text-xs font-bold text-pink-500 uppercase tracking-wide">Time</label>
+                <input type="time" id="timeInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent text-sm bg-white/90">
             </div>
         </div>
 
-        <button onclick="submitDate()" id="submitBtn" class="w-full py-3 rounded-full font-semibold text-white bg-gray-300 cursor-not-allowed transition-all duration-300" disabled>
+        <button onclick="submitDate()" id="submitBtn" class="btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed transition-all duration-300 text-lg" disabled>
             Pick an activity first!
         </button>
     </div>
 
     <!-- SUCCESS SCREEN -->
-    <div id="successScreen" class="hidden bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl w-full max-w-md text-center border border-white z-10">
-        <div class="text-6xl mb-4">💖</div>
-        <h2 class="text-3xl font-cursive text-pink-500 mb-2">I can't wait!</h2>
-        <p class="text-gray-600 mb-4">Your date has been set. See you then, beautiful! ✨</p>
-        <p id="summaryText" class="text-sm font-medium text-pink-600 bg-pink-50 p-3 rounded-lg border border-pink-200"></p>
+    <div id="successScreen" class="hidden glass-card p-10 rounded-3xl w-full max-w-md text-center z-10 transition-all duration-500">
+        <div class="text-7xl mb-4 animate-bounce">💖</div>
+        <h2 class="text-4xl font-cursive text-pink-600 mb-3">I can't wait!</h2>
+        <p class="text-gray-700 font-medium mb-6">Your date request has been sent straight to my heart (and my phone)! See you then, beautiful! ✨</p>
+        <div id="summaryText" class="text-sm font-semibold text-pink-700 bg-pink-100/80 p-4 rounded-xl border border-pink-300 shadow-sm"></div>
     </div>
 
     <script>
@@ -93,27 +133,30 @@
             
             let html = '';
             if(act === 'Rides') {
-                html = `<label class="text-xs font-semibold text-pink-600 uppercase">Where are we riding to?</label>
-                        <input type="text" id="detailInput" onchange="updateDetail(this.value)" placeholder="e.g. Tagaytay, Beach..." class="w-full mt-2 p-2 border rounded-lg text-sm">`;
+                html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide">Where are we riding to?</label>
+                        <input type="text" id="detailInput" onchange="updateDetail(this.value)" placeholder="e.g. Tagaytay, Nuvali, Coffee shop..." class="w-full mt-2 p-2.5 border border-pink-100 rounded-xl text-sm focus:ring-2 focus:ring-pink-300 outline-none">`;
                 document.getElementById('timeLabel').innerText = "Time";
             } else if(act === 'Overnight') {
-                html = `<p class="text-sm text-gray-600 font-medium text-center">Yay! Movie marathon and cuddles! 🍿</p>`;
+                html = `<div class="flex flex-col items-center justify-center p-2">
+                            <span class="text-3xl mb-2">🍿🧸</span>
+                            <p class="text-sm text-pink-600 font-semibold text-center">Yay! Movie marathon and endless cuddles!</p>
+                        </div>`;
                 selection.detail = 'Cuddles & Movies';
                 document.getElementById('timeLabel').innerText = "Time coming over 🏠";
             } else if(act === 'Visit') {
-                html = `<label class="text-xs font-semibold text-pink-600 uppercase mb-2 block">Whose house?</label>
-                        <div class="flex gap-2">
-                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2 border rounded-lg text-sm">My House 👱‍♂️</button>
-                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2 border rounded-lg text-sm">Your House 👩</button>
+                html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">Whose house?</label>
+                        <div class="flex gap-3">
+                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors">My House 👱‍♂️</button>
+                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors">Your House 👩</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             } else if(act === 'Eat') {
-                html = `<label class="text-xs font-semibold text-pink-600 uppercase mb-2 block">What are you craving?</label>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-1 border rounded">🍢 Streetfoods</button>
-                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-1 border rounded">🥓 Samgyup</button>
-                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-1 border rounded">🍕 Pizza & Fries</button>
-                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-1 border rounded">🍦 Ice Cream</button>
+                html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">What are you craving?</label>
+                        <div class="grid grid-cols-2 gap-2.5 text-sm">
+                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍢 Streetfoods</button>
+                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🥓 Samgyup</button>
+                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍕 Pizza & Fries</button>
+                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍦 Ice Cream</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             }
@@ -123,9 +166,13 @@
 
         function updateDetail(val) {
             selection.detail = val;
-            document.querySelectorAll('.detail-btn').forEach(btn => btn.classList.remove('bg-pink-100', 'border-pink-400'));
+            document.querySelectorAll('.detail-btn').forEach(btn => {
+                btn.classList.remove('bg-pink-100', 'border-pink-400', 'text-pink-700');
+                btn.classList.add('border-pink-200');
+            });
             if(event && event.target.classList.contains('detail-btn')) {
-                event.target.classList.add('bg-pink-100', 'border-pink-400');
+                event.target.classList.remove('border-pink-200');
+                event.target.classList.add('bg-pink-100', 'border-pink-400', 'text-pink-700');
             }
             checkReady();
         }
@@ -140,24 +187,45 @@
             const btn = document.getElementById('submitBtn');
             if(selection.activity && selection.date && selection.time && (selection.activity === 'Overnight' || selection.detail !== '')) {
                 btn.disabled = false;
-                btn.className = "w-full py-3 rounded-full font-bold text-white bg-gradient-to-r from-pink-400 to-pink-500 shadow-lg transform hover:-translate-y-0.5 transition-all";
-                btn.innerText = "Confirm Date! 💖";
+                btn.className = "btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-lg cursor-pointer text-lg";
+                btn.innerText = "Confirm Our Date! 💖";
+            } else {
+                btn.disabled = true;
+                btn.className = "btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed transition-all duration-300 text-lg";
+                btn.innerText = "Fill out everything first ✨";
             }
         }
 
         function submitDate() {
             const btn = document.getElementById('submitBtn');
-            btn.innerText = "Sending... 💌";
+            btn.innerText = "Sending to my heart... 💌";
+            btn.disabled = true;
 
-            // ==========================================
-            aec85106-f4df-4783-a23f-35825e916a5f
-            // ==========================================
-            const accessKey = "YOUR_ACCESS_KEY_HERE"; 
+            const accessKey = "aec85106-f4df-4783-a23f-35825e916a5f"; 
+
+            // Format date to look nicer in the email
+            const dateObj = new Date(selection.date);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Create a nice HTML template for the email you receive
+            const emailHTML = `
+                <div style="font-family: sans-serif; padding: 20px; background-color: #fdf2f8; border-radius: 10px;">
+                    <h2 style="color: #db2777;">❤️ You have a new Date Request! ❤️</h2>
+                    <p style="font-size: 16px; color: #4b5563;">Your beautiful girlfriend just planned a date for you:</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Activity</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.activity}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Details</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.detail}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Date</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${formattedDate}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Time</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.time}</td></tr>
+                    </table>
+                    <p style="margin-top: 20px; color: #db2777; font-style: italic;">Have a great time!</p>
+                </div>
+            `;
 
             const payload = {
                 access_key: accessKey,
-                subject: "❤️ New Date Request from Your GF! ❤️",
-                message: `Activity: ${selection.activity}\nDetails/Location: ${selection.detail}\nDate: ${selection.date}\nTime: ${selection.time}`
+                subject: "❤️ Date Planned: " + selection.activity + " on " + selection.date,
+                message: emailHTML
             };
 
             fetch('https://api.web3forms.com/submit', {
@@ -172,29 +240,36 @@
                 if (response.status === 200) {
                     document.getElementById('mainApp').classList.add('hidden');
                     document.getElementById('successScreen').classList.remove('hidden');
-                    document.getElementById('summaryText').innerText = `${selection.activity} (${selection.detail}) on ${selection.date} at ${selection.time}`;
-                    for(let i=0; i<40; i++) setTimeout(createHeart, i*50);
+                    document.getElementById('summaryText').innerHTML = `Get ready for <b>${selection.activity}</b> (${selection.detail}) <br>on <b>${formattedDate}</b> at <b>${selection.time}</b>!`;
+                    
+                    // Trigger massive heart burst
+                    for(let i=0; i<60; i++) setTimeout(createHeart, i*40);
                 } else {
-                    alert("Something went wrong!");
-                    btn.innerText = "Try Again";
+                    alert("Oops! The love letters got lost in the mail. Try again!");
+                    btn.innerText = "Confirm Our Date! 💖";
+                    btn.disabled = false;
                 }
             })
             .catch(error => {
-                alert("Error sending email.");
-                btn.innerText = "Try Again";
+                alert("Error sending email. Check your internet!");
+                btn.innerText = "Confirm Our Date! 💖";
+                btn.disabled = false;
             });
         }
 
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
-            heart.innerText = ['❤️', '💖', '✨', '💕'][Math.floor(Math.random() * 4)];
+            const icons = ['❤️', '💖', '✨', '💕', '🥰', '😘'];
+            heart.innerText = icons[Math.floor(Math.random() * icons.length)];
             heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 5000);
         }
-        setInterval(createHeart, 800);
+        
+        // Spawn occasional background hearts
+        setInterval(createHeart, 1200);
     </script>
 </body>
 </html>
