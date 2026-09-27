@@ -3,625 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Love</title>
-    
+    <title>For My Love ❤️</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Leaflet CSS for the Map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #fce7f3 0%, #fee2e2 100%);
-            overflow-x: hidden;
             min-height: 100vh;
+            overflow-x: hidden;
         }
-        
-        .font-cursive {
-            font-family: 'Dancing Script', cursive;
-        }
-
-        /* Floating Hearts Animation */
-        .heart-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .floating-heart {
-            position: absolute;
-            bottom: -50px;
-            font-size: 1.5rem;
-            animation: floatUp 6s linear infinite;
-            opacity: 0.7;
-        }
-
+        .font-cursive { font-family: 'Dancing Script', cursive; }
+        .card { transition: all 0.3s ease; }
+        .card.selected { border-color: #f472b6; background-color: #fdf2f8; transform: scale(1.05); }
+        .hidden { display: none; }
+        .heart { position: fixed; font-size: 1.5rem; animation: floatUp 4s linear forwards; pointer-events: none; z-index: 50;}
         @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0.8; }
-            100% { transform: translateY(-120vh) scale(1.5) rotate(360deg); opacity: 0; }
-        }
-
-        /* Screen Transitions */
-        .screen {
-            display: none;
-            animation: fadeIn 0.4s ease-in-out;
-        }
-        
-        .screen.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Selectable Card Styles */
-        .choice-card {
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .choice-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 12px -3px rgba(251, 113, 133, 0.2);
-        }
-
-        .choice-card.selected {
-            border-color: #fb7185;
-            background-color: #fff1f2;
-            transform: scale(1.02);
-            box-shadow: 0 4px 6px -1px rgba(251, 113, 133, 0.3);
-        }
-        
-        input[type="date"], input[type="time"], input[type="datetime-local"], select {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        /* Map Container */
-        #map {
-            height: 250px;
-            width: 100%;
-            border-radius: 0.75rem;
-            z-index: 1;
-            border: 2px solid #fce7f3;
-        }
-
-        /* Loader */
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #fb7185;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translateY(100vh) scale(0); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
         }
     </style>
 </head>
-<body class="text-gray-800 relative">
+<body class="flex items-center justify-center p-4 relative">
 
-    <div class="heart-container" id="hearts-bg"></div>
+    <!-- MAIN APP -->
+    <div id="mainApp" class="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-md my-8 border border-white relative z-10">
+        <h1 class="text-4xl font-cursive text-pink-500 text-center mb-2">Our Perfect Date</h1>
+        <p class="text-center text-gray-500 text-sm mb-6">Design our next adventure together ✨</p>
 
-    <main class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        
-        <div class="bg-white/95 backdrop-blur-sm shadow-2xl rounded-3xl w-full max-w-md p-6 sm:p-8 border border-pink-100 overflow-hidden relative">
-            
-            <!-- 1. LANDING SCREEN -->
-            <div id="screen-home" class="screen active flex-col items-center text-center py-8">
-                <div class="w-24 h-24 bg-rose-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                    <span class="text-5xl">💝</span>
+        <!-- Step 1: Activity -->
+        <div class="mb-6">
+            <h2 class="text-sm font-semibold text-pink-600 mb-3 uppercase tracking-wider">1. What are we doing?</h2>
+            <div class="grid grid-cols-2 gap-3">
+                <div onclick="selectActivity('Rides')" id="act-Rides" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
+                    <div class="text-2xl mb-1">🛵</div><div class="text-sm font-medium">Rides</div>
                 </div>
-                <h1 class="font-cursive text-5xl text-rose-500 mb-4 tracking-wide">Hello Beautiful</h1>
-                <p class="text-gray-600 mb-8 text-md leading-relaxed">
-                    You mean the absolute world to me.<br>
-                    I put together a little something for us. Are you ready?
-                </p>
-                <button onclick="goToPlanner()" class="bg-gradient-to-r from-rose-400 to-pink-500 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full text-lg animate-pulse">
-                    Let's Plan a Date! ✨
-                </button>
-
-                <!-- Hidden Admin Button -->
-                <button onclick="promptAdmin()" class="absolute bottom-2 right-2 opacity-10 hover:opacity-50 text-xs p-2 rounded transition-opacity">
-                    🔒
-                </button>
-            </div>
-
-            <!-- 2. PLANNER SCREEN -->
-            <div id="screen-planner" class="screen flex-col w-full h-[85vh] sm:h-auto overflow-y-auto pb-4" style="scrollbar-width: none;">
-                <div class="text-center mb-6 sticky top-0 bg-white/95 pb-3 z-10 pt-2 border-b border-pink-50">
-                    <h2 class="font-cursive text-4xl text-rose-500">Our Next Date</h2>
-                    <p class="text-xs text-gray-400 mt-1">Design our adventure together</p>
+                <div onclick="selectActivity('Overnight')" id="act-Overnight" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
+                    <div class="text-2xl mb-1">🌙</div><div class="text-sm font-medium">Overnight</div>
                 </div>
-
-                <div class="space-y-6 px-1">
-                    
-                    <!-- Activity Selection (Always visible) -->
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-3 text-sm uppercase tracking-wider">1. What are we doing?</h3>
-                        <div class="grid grid-cols-2 gap-3" id="activity-options">
-                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectActivity('Rides', this)">
-                                <span class="text-3xl block mb-2">🛵</span>
-                                <span class="text-sm font-medium">Rides</span>
-                            </div>
-                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectActivity('Overnight', this)">
-                                <span class="text-3xl block mb-2">🌙</span>
-                                <span class="text-sm font-medium">Overnight</span>
-                            </div>
-                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectActivity('Visit', this)">
-                                <span class="text-3xl block mb-2">🏠</span>
-                                <span class="text-sm font-medium">Visit</span>
-                            </div>
-                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectActivity('Eat', this)">
-                                <span class="text-3xl block mb-2">🍽️</span>
-                                <span class="text-sm font-medium">Eat</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dynamic Container for Activity Specifics -->
-                    <div id="dynamic-content" class="hidden space-y-6 border-t border-pink-50 pt-4">
-                        <!-- Populated by JS -->
-                    </div>
-                    
-                    <div class="pt-4 mt-auto">
-                        <button onclick="submitDate()" id="confirm-btn" class="flex items-center justify-center gap-2 bg-gray-200 text-gray-400 font-semibold py-4 px-8 rounded-full w-full text-lg transition-all duration-300 pointer-events-none cursor-not-allowed">
-                            <span id="btn-text">Select options above</span>
-                            <div id="btn-loader" class="loader hidden"></div>
-                        </button>
-                    </div>
+                <div onclick="selectActivity('Visit')" id="act-Visit" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
+                    <div class="text-2xl mb-1">🏠</div><div class="text-sm font-medium">Visit</div>
+                </div>
+                <div onclick="selectActivity('Eat')" id="act-Eat" class="card border-2 border-transparent bg-white p-4 rounded-xl cursor-pointer text-center shadow-sm hover:shadow-md">
+                    <div class="text-2xl mb-1">🍽️</div><div class="text-sm font-medium">Eat</div>
                 </div>
             </div>
-
-            <!-- 3. SUCCESS SCREEN -->
-            <div id="screen-success" class="screen flex-col items-center text-center py-8">
-                <div class="w-32 h-32 mb-6 relative">
-                    <div class="absolute inset-0 bg-pink-200 rounded-full animate-ping opacity-50"></div>
-                    <div class="relative bg-white rounded-full w-full h-full flex items-center justify-center shadow-xl z-10 text-6xl border-4 border-pink-100">
-                        🎉
-                    </div>
-                </div>
-                <h2 class="font-cursive text-5xl text-rose-500 mb-4">It's a Date!</h2>
-                <div class="bg-rose-50 rounded-2xl p-6 w-full mb-8 border border-rose-100 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-300 to-pink-400"></div>
-                    <p class="text-gray-700 font-medium mb-2">I've received your answers! ❤️</p>
-                    <p id="summary-text" class="text-rose-600 text-sm font-semibold leading-relaxed"></p>
-                </div>
-                <p class="text-gray-500 text-sm italic">I can't wait. Love you!</p>
-            </div>
-
-            <!-- 4. ADMIN DASHBOARD -->
-            <div id="screen-admin" class="screen flex-col w-full h-[80vh] sm:h-auto overflow-y-auto pb-4" style="scrollbar-width: none;">
-                <div class="flex justify-between items-center mb-6 sticky top-0 bg-white/95 pb-3 z-10 pt-2 border-b border-pink-50">
-                    <h2 class="font-bold text-xl text-gray-800">Secret Dashboard 🤫</h2>
-                    <button onclick="showScreen('screen-home')" class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200">Back</button>
-                </div>
-                
-                <div id="admin-loader" class="flex justify-center py-10 hidden">
-                    <div class="loader !border-gray-300 !border-t-rose-500 w-8 h-8"></div>
-                </div>
-                <div id="admin-results" class="space-y-4"></div>
-                <div id="admin-empty" class="text-center py-10 hidden">
-                    <span class="text-4xl mb-3 block">📭</span>
-                    <p class="text-gray-500 text-sm">She hasn't submitted anything yet.</p>
-                </div>
-            </div>
-
         </div>
-    </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        <div id="dynamicSection" class="hidden mb-6 bg-white p-4 rounded-xl border border-pink-100 shadow-sm"></div>
 
-        window.datePlannerApp = {
-            db: null,
-            appId: typeof __app_id !== 'undefined' ? __app_id : 'date-planner-app',
-            isAuthenticated: false
-        };
+        <div id="dateTimeSection" class="hidden mb-8 grid grid-cols-2 gap-4">
+            <div>
+                <label class="text-xs font-semibold text-gray-500 uppercase">Date</label>
+                <input type="date" id="dateInput" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:border-pink-400 text-sm">
+            </div>
+            <div>
+                <label id="timeLabel" class="text-xs font-semibold text-gray-500 uppercase">Time</label>
+                <input type="time" id="timeInput" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:border-pink-400 text-sm">
+            </div>
+        </div>
 
-        async function initFirebase() {
-            try {
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { projectId: "mock-project" };
-                const app = initializeApp(firebaseConfig);
-                window.datePlannerApp.db = getFirestore(app);
-                const auth = getAuth(app);
+        <button onclick="submitDate()" id="submitBtn" class="w-full py-3 rounded-full font-semibold text-white bg-gray-300 cursor-not-allowed transition-all duration-300" disabled>
+            Pick an activity first!
+        </button>
+    </div>
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                window.datePlannerApp.isAuthenticated = true;
-            } catch (error) {
-                console.error("Firebase init failed:", error);
-                window.datePlannerApp.isAuthenticated = true; // allow fallback visual testing
-            }
-        }
-        initFirebase();
-        
-        window.saveDateToFirebase = async function(dateData) {
-            if (!window.datePlannerApp.isAuthenticated || !window.datePlannerApp.db) return false;
-            try {
-                const datesRef = collection(window.datePlannerApp.db, 'artifacts', window.datePlannerApp.appId, 'public', 'data', 'date_plans');
-                await addDoc(datesRef, { ...dateData, timestamp: serverTimestamp() });
-                return true;
-            } catch (error) {
-                console.error("Error saving date:", error);
-                throw error; // Throw to trigger UI reset
-            }
-        };
-
-        window.fetchDatesFromFirebase = async function() {
-            if (!window.datePlannerApp.isAuthenticated || !window.datePlannerApp.db) return [];
-            try {
-                const datesRef = collection(window.datePlannerApp.db, 'artifacts', window.datePlannerApp.appId, 'public', 'data', 'date_plans');
-                const snapshot = await getDocs(datesRef);
-                const results = [];
-                snapshot.forEach(doc => { results.push({ id: doc.id, ...doc.data() }); });
-                return results.sort((a, b) => {
-                    const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
-                    const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
-                    return timeB - timeA;
-                });
-            } catch (error) {
-                console.error("Error fetching dates:", error);
-                return [];
-            }
-        };
-    </script>
+    <!-- SUCCESS SCREEN -->
+    <div id="successScreen" class="hidden bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl w-full max-w-md text-center border border-white z-10">
+        <div class="text-6xl mb-4">💖</div>
+        <h2 class="text-3xl font-cursive text-pink-500 mb-2">I can't wait!</h2>
+        <p class="text-gray-600 mb-4">Your date has been set. See you then, beautiful! ✨</p>
+        <p id="summaryText" class="text-sm font-medium text-pink-600 bg-pink-50 p-3 rounded-lg border border-pink-200"></p>
+    </div>
 
     <script>
-        // --- State Management ---
-        const state = {
-            activity: null,
-            date: null,
-            time: null,
-            locationChoice: null, // My house or Her house
-            foodChoice: null,     // Selected food
-            mapPin: null          // {lat, lng}
-        };
+        let selection = { activity: '', detail: '', date: '', time: '' };
 
-        let leafletMap = null;
-        let mapMarker = null;
+        function selectActivity(act) {
+            selection.activity = act;
+            selection.detail = ''; 
+            
+            document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
+            document.getElementById('act-' + act).classList.add('selected');
 
-        // --- Animations ---
-        function createFloatingHeart() {
-            const container = document.getElementById('hearts-bg');
-            if(!container) return;
-            const heart = document.createElement('div');
-            heart.classList.add('floating-heart');
-            const symbols = ['❤️', '💖', '💕', '✨', '🌸'];
-            heart.innerText = symbols[Math.floor(Math.random() * symbols.length)];
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.transform = `scale(${Math.random() * 0.5 + 1})`;
-            const duration = Math.random() * 4 + 6; 
-            heart.style.animationDuration = `${duration}s`;
-            container.appendChild(heart);
-            setTimeout(() => heart.remove(), duration * 1000);
-        }
-        setInterval(createFloatingHeart, 800);
-
-        // --- Navigation ---
-        window.showScreen = function(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            window.scrollTo(0, 0);
-        };
-        window.goToPlanner = () => window.showScreen('screen-planner');
-
-        // --- Dynamic UI Logic ---
-        window.selectActivity = function(activity, element) {
-            // Reset state for new activity
-            state.activity = activity;
-            state.date = null; state.time = null; state.locationChoice = null; state.foodChoice = null; state.mapPin = null;
-
-            // Update UI selection
-            const parent = element.parentElement;
-            Array.from(parent.children).forEach(child => child.classList.remove('selected'));
-            element.classList.add('selected');
-
-            renderDynamicContent(activity);
-            validateForm();
-        };
-
-        function renderDynamicContent(activity) {
-            const container = document.getElementById('dynamic-content');
-            container.innerHTML = '';
-            container.classList.remove('hidden');
-
+            const dyn = document.getElementById('dynamicSection');
+            dyn.classList.remove('hidden');
+            document.getElementById('dateTimeSection').classList.remove('hidden');
+            
             let html = '';
-
-            if (activity === 'Rides') {
-                html = `
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-2 text-sm uppercase">2. When are we going?</h3>
-                        <input type="datetime-local" onchange="updateState('datetime', this.value)" class="w-full bg-gray-50 border border-gray-200 focus:border-rose-400 focus:bg-white rounded-xl p-3 text-gray-700 outline-none transition-all">
-                    </div>
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-2 text-sm uppercase">3. Where to? Drop a pin! 📍</h3>
-                        <div id="map"></div>
-                        <p class="text-xs text-gray-400 mt-2 italic text-center" id="map-status">Click on the map to set our destination.</p>
-                    </div>
-                `;
-            } 
-            else if (activity === 'Overnight') {
-                html = `
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <h3 class="font-medium text-rose-800 mb-2 text-xs uppercase">Date</h3>
-                            <input type="date" onchange="updateState('date', this.value)" class="w-full bg-gray-50 border border-gray-200 focus:border-rose-400 focus:bg-white rounded-xl p-3 text-gray-700 outline-none">
-                        </div>
-                        <div>
-                            <h3 class="font-medium text-rose-800 mb-2 text-xs uppercase">Time coming to my house</h3>
-                            <input type="time" onchange="updateState('time', this.value)" class="w-full bg-gray-50 border border-gray-200 focus:border-rose-400 focus:bg-white rounded-xl p-3 text-gray-700 outline-none">
-                        </div>
-                    </div>
-                `;
+            if(act === 'Rides') {
+                html = `<label class="text-xs font-semibold text-pink-600 uppercase">Where are we riding to?</label>
+                        <input type="text" id="detailInput" onchange="updateDetail(this.value)" placeholder="e.g. Tagaytay, Beach..." class="w-full mt-2 p-2 border rounded-lg text-sm">`;
+                document.getElementById('timeLabel').innerText = "Time";
+            } else if(act === 'Overnight') {
+                html = `<p class="text-sm text-gray-600 font-medium text-center">Yay! Movie marathon and cuddles! 🍿</p>`;
+                selection.detail = 'Cuddles & Movies';
+                document.getElementById('timeLabel').innerText = "Time coming over 🏠";
+            } else if(act === 'Visit') {
+                html = `<label class="text-xs font-semibold text-pink-600 uppercase mb-2 block">Whose house?</label>
+                        <div class="flex gap-2">
+                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2 border rounded-lg text-sm">My House 👱‍♂️</button>
+                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2 border rounded-lg text-sm">Your House 👩</button>
+                        </div>`;
+                document.getElementById('timeLabel').innerText = "Time";
+            } else if(act === 'Eat') {
+                html = `<label class="text-xs font-semibold text-pink-600 uppercase mb-2 block">What are you craving?</label>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-1 border rounded">🍢 Streetfoods</button>
+                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-1 border rounded">🥓 Samgyup</button>
+                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-1 border rounded">🍕 Pizza & Fries</button>
+                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-1 border rounded">🍦 Ice Cream</button>
+                        </div>`;
+                document.getElementById('timeLabel').innerText = "Time";
             }
-            else if (activity === 'Visit') {
-                html = `
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-2 text-sm uppercase">2. Whose house?</h3>
-                        <div class="flex gap-4">
-                            <label class="flex-1 cursor-pointer border border-gray-200 rounded-xl p-3 text-center hover:bg-gray-50 has-[:checked]:bg-rose-50 has-[:checked]:border-rose-300 transition-all">
-                                <input type="radio" name="visitLoc" value="My House" onchange="updateState('location', this.value)" class="hidden">
-                                <span class="text-sm font-medium">My House 🧑</span>
-                            </label>
-                            <label class="flex-1 cursor-pointer border border-gray-200 rounded-xl p-3 text-center hover:bg-gray-50 has-[:checked]:bg-rose-50 has-[:checked]:border-rose-300 transition-all">
-                                <input type="radio" name="visitLoc" value="Your House" onchange="updateState('location', this.value)" class="hidden">
-                                <span class="text-sm font-medium">Your House 👩</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <h3 class="font-medium text-rose-800 mb-2 text-xs uppercase">Date</h3>
-                            <input type="date" onchange="updateState('date', this.value)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none">
-                        </div>
-                        <div>
-                            <h3 class="font-medium text-rose-800 mb-2 text-xs uppercase">Time</h3>
-                            <input type="time" onchange="updateState('time', this.value)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none">
-                        </div>
-                    </div>
-                `;
+            dyn.innerHTML = html;
+            checkReady();
+        }
+
+        function updateDetail(val) {
+            selection.detail = val;
+            document.querySelectorAll('.detail-btn').forEach(btn => btn.classList.remove('bg-pink-100', 'border-pink-400'));
+            if(event && event.target.classList.contains('detail-btn')) {
+                event.target.classList.add('bg-pink-100', 'border-pink-400');
             }
-            else if (activity === 'Eat') {
-                html = `
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-2 text-sm uppercase">2. What are we craving?</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            ${['Streetfoods 🍢', 'Fries 🍟', 'Samgyup 🥓', 'Pizza 🍕', 'Ice Cream 🍦', 'Other 😋'].map(food => `
-                                <div class="choice-card bg-gray-50 rounded-xl p-2 text-center text-xs font-medium" onclick="selectFood('${food.split(' ')[0]}', this)">
-                                    ${food}
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-medium text-rose-800 mb-2 text-sm uppercase">3. When?</h3>
-                        <input type="datetime-local" onchange="updateState('datetime', this.value)" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none">
-                    </div>
-                `;
-            }
+            checkReady();
+        }
 
-            container.innerHTML = html;
+        document.getElementById('dateInput').addEventListener('change', checkReady);
+        document.getElementById('timeInput').addEventListener('change', checkReady);
 
-            if (activity === 'Rides') {
-                // Destroy old map instance if it exists to prevent errors
-                if (leafletMap) {
-                    leafletMap.remove();
-                    leafletMap = null;
-                }
-                
-                // Initialize map inside a small timeout to allow DOM to render the container
-                setTimeout(() => {
-                    leafletMap = L.map('map').setView([14.178, 121.238], 11); // Centered near Calabarzon, PH
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap'
-                    }).addTo(leafletMap);
-
-                    // CRITICAL FIX: Invalidate size so tiles load correctly in dynamic div
-                    setTimeout(() => { leafletMap.invalidateSize(); }, 200);
-
-                    leafletMap.on('click', function(e) {
-                        if (mapMarker) {
-                            leafletMap.removeLayer(mapMarker);
-                        }
-                        mapMarker = L.marker(e.latlng).addTo(leafletMap);
-                        state.mapPin = { lat: e.latlng.lat, lng: e.latlng.lng };
-                        document.getElementById('map-status').innerText = "Destination set! 🗺️";
-                        document.getElementById('map-status').classList.replace('text-gray-400', 'text-emerald-500');
-                        validateForm();
-                    });
-                }, 100);
+        function checkReady() {
+            selection.date = document.getElementById('dateInput').value;
+            selection.time = document.getElementById('timeInput').value;
+            
+            const btn = document.getElementById('submitBtn');
+            if(selection.activity && selection.date && selection.time && (selection.activity === 'Overnight' || selection.detail !== '')) {
+                btn.disabled = false;
+                btn.className = "w-full py-3 rounded-full font-bold text-white bg-gradient-to-r from-pink-400 to-pink-500 shadow-lg transform hover:-translate-y-0.5 transition-all";
+                btn.innerText = "Confirm Date! 💖";
             }
         }
 
-        window.updateState = function(key, value) {
-            if (key === 'datetime') {
-                // Split datetime-local into date and time
-                if(value) {
-                    const [d, t] = value.split('T');
-                    state.date = d;
-                    state.time = t;
+        function submitDate() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Sending... 💌";
+
+            // ==========================================
+            aec85106-f4df-4783-a23f-35825e916a5f
+            // ==========================================
+            const accessKey = "YOUR_ACCESS_KEY_HERE"; 
+
+            const payload = {
+                access_key: accessKey,
+                subject: "❤️ New Date Request from Your GF! ❤️",
+                message: `Activity: ${selection.activity}\nDetails/Location: ${selection.detail}\nDate: ${selection.date}\nTime: ${selection.time}`
+            };
+
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(async (response) => {
+                if (response.status === 200) {
+                    document.getElementById('mainApp').classList.add('hidden');
+                    document.getElementById('successScreen').classList.remove('hidden');
+                    document.getElementById('summaryText').innerText = `${selection.activity} (${selection.detail}) on ${selection.date} at ${selection.time}`;
+                    for(let i=0; i<40; i++) setTimeout(createHeart, i*50);
                 } else {
-                    state.date = null; state.time = null;
+                    alert("Something went wrong!");
+                    btn.innerText = "Try Again";
                 }
-            } else if (key === 'date') state.date = value;
-            else if (key === 'time') state.time = value;
-            else if (key === 'location') state.locationChoice = value;
-            
-            validateForm();
-        };
-
-        window.selectFood = function(foodName, element) {
-            state.foodChoice = foodName;
-            const parent = element.parentElement;
-            Array.from(parent.children).forEach(child => child.classList.remove('selected'));
-            element.classList.add('selected');
-            validateForm();
-        };
-
-        function validateForm() {
-            let isValid = false;
-            
-            if (state.activity === 'Rides') {
-                isValid = state.date && state.time && state.mapPin;
-            } else if (state.activity === 'Overnight') {
-                isValid = state.date && state.time;
-            } else if (state.activity === 'Visit') {
-                isValid = state.date && state.time && state.locationChoice;
-            } else if (state.activity === 'Eat') {
-                isValid = state.date && state.time && state.foodChoice;
-            }
-
-            const btn = document.getElementById('confirm-btn');
-            const btnText = document.getElementById('btn-text');
-            
-            if (isValid) {
-                btn.classList.remove('bg-gray-200', 'text-gray-400', 'pointer-events-none', 'cursor-not-allowed');
-                btn.classList.add('bg-gradient-to-r', 'from-rose-400', 'to-pink-500', 'text-white', 'shadow-lg', 'hover:scale-105', 'cursor-pointer');
-                btnText.innerText = "Confirm Date! 💖";
-            } else {
-                btn.classList.add('bg-gray-200', 'text-gray-400', 'pointer-events-none', 'cursor-not-allowed');
-                btn.classList.remove('bg-gradient-to-r', 'from-rose-400', 'to-pink-500', 'text-white', 'shadow-lg', 'hover:scale-105', 'cursor-pointer');
-                btnText.innerText = "Fill missing details";
-            }
+            })
+            .catch(error => {
+                alert("Error sending email.");
+                btn.innerText = "Try Again";
+            });
         }
 
-        window.submitDate = async function() {
-            // UI Loading state to prevent infinite loops, reset explicitly if error
-            const btnText = document.getElementById('btn-text');
-            const btnLoader = document.getElementById('btn-loader');
-            const confirmBtn = document.getElementById('confirm-btn');
-            
-            try {
-                btnText.innerText = "Saving...";
-                btnLoader.classList.remove('hidden');
-                confirmBtn.classList.add('pointer-events-none', 'opacity-80');
-
-                // Format friendly date
-                const dateObj = new Date(`${state.date}T${state.time}`);
-                const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-
-                // Construct save object
-                const payload = {
-                    activity: state.activity,
-                    rawDate: state.date,
-                    rawTime: state.time,
-                    formattedDate: formattedDate
-                };
-
-                // Add specifics
-                if (state.activity === 'Rides') payload.mapPin = state.mapPin;
-                if (state.activity === 'Visit') payload.locationChoice = state.locationChoice;
-                if (state.activity === 'Eat') payload.foodChoice = state.foodChoice;
-
-                if (window.saveDateToFirebase) {
-                    await window.saveDateToFirebase(payload);
-                } else {
-                    await new Promise(r => setTimeout(r, 1000)); // Fallback simulation
-                }
-
-                // Generate success text
-                let sumText = "";
-                if (state.activity === 'Rides') sumText = `Get ready for a Ride on ${formattedDate}. I've saved the destination you picked!`;
-                else if (state.activity === 'Overnight') sumText = `Can't wait for our Overnight! See you at my house on ${formattedDate}.`;
-                else if (state.activity === 'Visit') sumText = `I'll be visiting ${state.locationChoice === 'My House' ? 'my house' : 'your house'} on ${formattedDate}.`;
-                else if (state.activity === 'Eat') sumText = `Get ready to eat some delicious ${state.foodChoice} on ${formattedDate}.`;
-                
-                document.getElementById('summary-text').innerText = sumText;
-                
-                // Big blast
-                for(let i=0; i<30; i++) setTimeout(createFloatingHeart, i * 50);
-                window.showScreen('screen-success');
-
-            } catch (error) {
-                // Fix infinite loading: Reset button UI if something fails
-                console.error("Submission failed", error);
-                btnText.innerText = "Error. Try Again!";
-                btnLoader.classList.add('hidden');
-                confirmBtn.classList.remove('pointer-events-none', 'opacity-80');
-            }
-        };
-
-        window.promptAdmin = function() {
-            const pwd = window.prompt("Enter secret code:");
-            if (pwd === "admin") openAdmin();
-        };
-
-        async function openAdmin() {
-            window.showScreen('screen-admin');
-            const loader = document.getElementById('admin-loader');
-            const resultsContainer = document.getElementById('admin-results');
-            const emptyState = document.getElementById('admin-empty');
-            
-            resultsContainer.innerHTML = '';
-            emptyState.classList.add('hidden');
-            loader.classList.remove('hidden');
-
-            if (window.fetchDatesFromFirebase) {
-                const dates = await window.fetchDatesFromFirebase();
-                loader.classList.add('hidden');
-
-                if (dates.length === 0) {
-                    emptyState.classList.remove('hidden');
-                } else {
-                    dates.forEach((date, index) => {
-                        const card = document.createElement('div');
-                        card.className = "bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden";
-                        
-                        let submittedAt = 'Just now';
-                        if (date.timestamp && typeof date.timestamp.toDate === 'function') {
-                            submittedAt = date.timestamp.toDate().toLocaleString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
-                        }
-
-                        // Build specific extra details
-                        let extraDetails = '';
-                        if (date.activity === 'Rides' && date.mapPin) {
-                            const mapLink = `https://www.google.com/maps?q=${date.mapPin.lat},${date.mapPin.lng}`;
-                            extraDetails = `<a href="${mapLink}" target="_blank" class="text-blue-500 underline text-xs mt-2 block flex items-center gap-1">📍 Open in Google Maps</a>`;
-                        } else if (date.activity === 'Visit') {
-                            extraDetails = `<p class="text-gray-800 text-sm mt-1"><span class="font-semibold text-rose-500">Where:</span> ${date.locationChoice}</p>`;
-                        } else if (date.activity === 'Eat') {
-                            extraDetails = `<p class="text-gray-800 text-sm mt-1"><span class="font-semibold text-rose-500">Food:</span> ${date.foodChoice}</p>`;
-                        }
-
-                        card.innerHTML = `
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-400"></div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs text-gray-400 font-medium">Idea #${dates.length - index}</span>
-                                <span class="text-[10px] text-gray-300 bg-gray-50 px-2 py-1 rounded">${submittedAt}</span>
-                            </div>
-                            <p class="text-gray-800 text-sm mb-1"><span class="font-semibold text-rose-500">Activity:</span> ${date.activity}</p>
-                            <p class="text-gray-800 text-sm"><span class="font-semibold text-rose-500">When:</span> ${date.formattedDate}</p>
-                            ${extraDetails}
-                        `;
-                        resultsContainer.appendChild(card);
-                    });
-                }
-            } else {
-                loader.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-            }
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerText = ['❤️', '💖', '✨', '💕'][Math.floor(Math.random() * 4)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
         }
+        setInterval(createHeart, 800);
     </script>
 </body>
 </html>
