@@ -12,7 +12,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* Animated Gradient Background */
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(-45deg, #fce7f3, #fee2e2, #fbcfe8, #ffedd5);
@@ -20,6 +19,7 @@
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y: auto;
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="%23f472b6" stroke="%23ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'), auto;
         }
 
@@ -31,7 +31,6 @@
 
         .font-cursive { font-family: 'Dancing Script', cursive; }
         
-        /* Glassmorphism Card */
         .glass-card {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(12px);
@@ -44,30 +43,41 @@
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(244, 114, 182, 0.2); }
         .card.selected { border-color: #f472b6; background-color: rgba(253, 242, 248, 0.9); transform: scale(1.05); box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
         
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         
-        /* Floating Emojis */
         .heart { position: fixed; font-size: 1.5rem; animation: floatUp 4s linear forwards; pointer-events: none; z-index: 50;}
         @keyframes floatUp {
             0% { transform: translateY(100vh) scale(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(-10vh) scale(1.5) rotate(20deg); opacity: 0; }
         }
         
-        /* Custom Button Glow */
         .btn-glow { transition: all 0.3s ease; }
         .btn-glow:hover:not(:disabled) { box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); transform: translateY(-2px); }
+
+        /* The dodging No button */
+        #noBtn { transition: all 0.2s ease-in-out; z-index: 100; }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 relative">
+<body class="flex flex-col items-center justify-center p-4 relative min-h-screen">
 
-    <!-- MAIN APP -->
-    <div id="mainApp" class="glass-card p-8 rounded-3xl w-full max-w-md my-8 relative z-10 transition-all duration-500">
+    <!-- PRANK SCREEN -->
+    <div id="prankScreen" class="glass-card p-10 rounded-3xl w-full max-w-sm text-center z-20">
+        <div class="text-6xl mb-4 animate-bounce">🥺</div>
+        <h1 class="text-3xl font-cursive text-pink-600 mb-8">Will you go on a date with me?</h1>
+        
+        <div class="flex justify-center gap-4 relative h-16">
+            <button onclick="acceptDate()" class="btn-glow px-8 py-3 rounded-full font-bold text-white bg-gradient-to-r from-pink-400 to-rose-400 shadow-lg text-lg w-32 z-10">Yes!</button>
+            <button id="noBtn" class="px-8 py-3 rounded-full font-bold text-gray-500 bg-gray-200 shadow border border-gray-300 text-lg w-32 cursor-not-allowed">No</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP (Hidden initially) -->
+    <div id="mainApp" class="hidden glass-card p-8 rounded-3xl w-full max-w-md my-8 relative z-10">
         <div class="text-center mb-6">
             <h1 class="text-4xl font-cursive text-pink-600 mb-1 tracking-wide">Our Perfect Date</h1>
-            <p class="text-gray-600 text-sm font-medium">Hello beautiful! Design our next adventure together ✨</p>
+            <p class="text-gray-600 text-sm font-medium">Yay! Design our next adventure together ✨</p>
         </div>
 
-        <!-- Step 1: Activity -->
         <div class="mb-6">
             <h2 class="text-xs font-bold text-pink-500 mb-3 uppercase tracking-widest flex items-center gap-2">
                 <span class="w-4 h-[1px] bg-pink-400"></span> 1. What are we doing? <span class="w-4 h-[1px] bg-pink-400"></span>
@@ -88,47 +98,74 @@
             </div>
         </div>
 
-        <!-- Dynamic Sections -->
-        <div id="dynamicSection" class="hidden mb-6 bg-white/70 p-5 rounded-2xl border border-pink-200 shadow-inner transition-all duration-300"></div>
+        <div id="dynamicSection" class="hidden mb-6 bg-white/70 p-5 rounded-2xl border border-pink-200 shadow-inner"></div>
 
-        <!-- Date & Time -->
-        <div id="dateTimeSection" class="hidden mb-8 grid grid-cols-2 gap-4 transition-all duration-300">
+        <div id="dateTimeSection" class="hidden mb-8 grid grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold text-pink-500 uppercase tracking-wide">Date</label>
-                <input type="date" id="dateInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent text-sm bg-white/90">
+                <input type="date" id="dateInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white/90">
             </div>
             <div>
                 <label id="timeLabel" class="text-xs font-bold text-pink-500 uppercase tracking-wide">Time</label>
-                <input type="time" id="timeInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent text-sm bg-white/90">
+                <input type="time" id="timeInput" class="w-full mt-1 p-2.5 border border-pink-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white/90">
             </div>
         </div>
 
-        <button onclick="submitDate()" id="submitBtn" class="btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed transition-all duration-300 text-lg" disabled>
+        <button onclick="submitDate()" id="submitBtn" class="btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed text-lg" disabled>
             Pick an activity first!
         </button>
     </div>
 
     <!-- SUCCESS SCREEN -->
-    <div id="successScreen" class="hidden glass-card p-10 rounded-3xl w-full max-w-md text-center z-10 transition-all duration-500">
+    <div id="successScreen" class="hidden glass-card p-10 rounded-3xl w-full max-w-md text-center z-10">
         <div class="text-7xl mb-4 animate-bounce">💖</div>
         <h2 class="text-4xl font-cursive text-pink-600 mb-3">I can't wait!</h2>
-        <p class="text-gray-700 font-medium mb-6">Your date request has been sent straight to my heart (and my email)! See you then, beautiful! ✨</p>
-        <div id="summaryText" class="text-sm font-semibold text-pink-700 bg-pink-100/80 p-4 rounded-xl border border-pink-300 shadow-sm"></div>
+        <p class="text-gray-700 font-medium mb-6">Your date request has been sent straight to my phone! See you then, beautiful! ✨</p>
+        <div id="summaryText" class="text-sm font-semibold text-pink-700 bg-pink-100/80 p-4 rounded-xl border border-pink-300"></div>
     </div>
 
     <!-- ADMIN DASHBOARD -->
-    <div id="adminScreen" class="hidden glass-card p-8 rounded-3xl w-full max-w-md z-10 transition-all duration-500">
+    <div id="adminScreen" class="hidden glass-card p-8 rounded-3xl w-full max-w-md z-10">
         <h2 class="text-2xl font-bold text-pink-600 mb-4 flex justify-between items-center border-b border-pink-200 pb-2">
-            <span>🔒 Secret Dashboard</span>
-            <button onclick="closeAdmin()" class="text-sm text-gray-500 hover:text-pink-500 font-medium bg-white px-3 py-1 rounded-full border border-pink-100 shadow-sm">Close</button>
+            <span>🔒 Dashboard</span>
+            <button onclick="closeAdmin()" class="text-sm text-gray-500 hover:text-pink-500 bg-white px-3 py-1 rounded-full shadow-sm">Close</button>
         </h2>
         <div id="adminData" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2"></div>
     </div>
 
     <!-- Admin Lock Icon -->
-    <div class="fixed bottom-3 right-3 text-2xl opacity-20 hover:opacity-100 cursor-pointer p-2 z-50 transition-opacity duration-300" onclick="openAdmin()">🔒</div>
+    <div class="fixed bottom-3 right-3 text-2xl opacity-20 hover:opacity-100 cursor-pointer p-2 z-50" onclick="openAdmin()">🔒</div>
 
     <script>
+        // PRANK LOGIC - The "No" button runs away
+        const noBtn = document.getElementById('noBtn');
+        
+        function moveNoButton() {
+            // Get screen bounds safely
+            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+            
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        // Works for mouse and touch screens
+        noBtn.addEventListener('mouseover', moveNoButton);
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNoButton(); });
+        noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNoButton(); });
+
+        function acceptDate() {
+            document.getElementById('prankScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            // Trigger a mini celebration
+            for(let i=0; i<15; i++) setTimeout(createHeart, i*100);
+        }
+
+        // MAIN APP LOGIC
         let selection = { activity: '', detail: '', date: '', time: '' };
         let map;
         let mapMarker;
@@ -160,49 +197,41 @@
             } else if(act === 'Visit') {
                 html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">Whose house?</label>
                         <div class="flex gap-3">
-                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors bg-white/50">My House 👱‍♂️</button>
-                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors bg-white/50">Your House 👩</button>
+                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 bg-white/50">My House 👱‍♂️</button>
+                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 bg-white/50">Your House 👩</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             } else if(act === 'Eat') {
                 html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">What are you craving?</label>
                         <div class="grid grid-cols-2 gap-2.5 text-sm">
-                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍢 Streetfoods</button>
-                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🥓 Samgyup</button>
-                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍕 Pizza & Fries</button>
-                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍦 Ice Cream</button>
+                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 bg-white/50">🍢 Streetfoods</button>
+                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 bg-white/50">🥓 Samgyup</button>
+                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 bg-white/50">🍕 Pizza & Fries</button>
+                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 bg-white/50">🍦 Ice Cream</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             }
             
             dyn.innerHTML = html;
 
-            // MAP INITIALIZATION LOGIC
             if(act === 'Rides') {
                 setTimeout(() => {
                     if(map) { map.remove(); }
-                    // Centered near Calabarzon, Philippines
                     map = L.map('map').setView([14.18, 121.28], 10);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap'
-                    }).addTo(map);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
                     
                     map.on('click', function(e) {
                         if(mapMarker) { map.removeLayer(mapMarker); }
                         mapMarker = L.marker(e.latlng).addTo(map);
                         
-                        // Generate Google Maps Link for you
                         selection.detail = `Map Pin: https://www.google.com/maps?q=${e.latlng.lat},${e.latlng.lng}`;
                         
                         const status = document.getElementById('map-status');
                         status.innerText = "📍 Location locked in!";
                         status.classList.remove('text-gray-500');
                         status.classList.add('text-pink-600', 'font-bold');
-                        
                         checkReady();
                     });
-                    
-                    // Crucial fix: forces the map to render inside the dynamic div
                     map.invalidateSize(); 
                 }, 150);
             }
@@ -237,7 +266,7 @@
                 btn.innerText = "Confirm Our Date! 💖";
             } else {
                 btn.disabled = true;
-                btn.className = "btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed transition-all duration-300 text-lg";
+                btn.className = "btn-glow w-full py-3.5 rounded-full font-bold text-white bg-gray-300 cursor-not-allowed text-lg";
                 btn.innerText = "Fill out everything first ✨";
             }
         }
@@ -247,7 +276,7 @@
             btn.innerText = "Sending to my heart... 💌";
             btn.disabled = true;
 
-            // SAVE TO LOCAL DASHBOARD
+            // Save to Local Dashboard
             let savedDates = JSON.parse(localStorage.getItem('my_gf_dates') || '[]');
             savedDates.push(selection);
             localStorage.setItem('my_gf_dates', JSON.stringify(savedDates));
@@ -256,23 +285,17 @@
             const dateObj = new Date(selection.date);
             const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Create clickable link in email if it's a map pin
-            let displayDetail = selection.detail;
-            if(displayDetail.includes('http')) {
-                displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" style="color: #3b82f6;">Open in Google Maps</a>`;
-            }
-
+            // SIMPLIFIED PLAIN-TEXT HTML TO BYPASS EMAIL FILTERS
             const emailHTML = `
-                <div style="font-family: sans-serif; padding: 20px; background-color: #fdf2f8; border-radius: 10px;">
-                    <h2 style="color: #db2777;">❤️ You have a new Date Request! ❤️</h2>
-                    <p style="font-size: 16px; color: #4b5563;">Your beautiful girlfriend just planned a date for you:</p>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden;">
-                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Activity</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${selection.activity}</td></tr>
-                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Details / Location</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${displayDetail}</td></tr>
-                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Date</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${formattedDate}</td></tr>
-                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Time</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${selection.time}</td></tr>
-                    </table>
-                    <p style="margin-top: 20px; color: #db2777; font-style: italic;">Have a great time!</p>
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2 style="color: #e91e63;">❤️ You have a new Date Request! ❤️</h2>
+                    <br>
+                    <p><b>Activity:</b> ${selection.activity}</p>
+                    <p><b>Details / Location / Craving:</b> ${selection.detail}</p>
+                    <p><b>Date:</b> ${formattedDate}</p>
+                    <p><b>Time:</b> ${selection.time}</p>
+                    <br>
+                    <p>Have fun you two!</p>
                 </div>
             `;
 
@@ -295,7 +318,6 @@
                     if(uiDisplayDetail.includes('http')) uiDisplayDetail = "A secret mapped location";
                     
                     document.getElementById('summaryText').innerHTML = `Get ready for <b>${selection.activity}</b> <br> (${uiDisplayDetail}) <br>on <b>${formattedDate}</b> at <b>${selection.time}</b>!`;
-                    
                     for(let i=0; i<60; i++) setTimeout(createHeart, i*40);
                 } else {
                     alert("Oops! The love letters got lost in the mail. Try again!");
@@ -313,6 +335,7 @@
         function openAdmin() {
             let pass = prompt("Enter dashboard password:");
             if(pass === "admin") {
+                document.getElementById('prankScreen').classList.add('hidden');
                 document.getElementById('mainApp').classList.add('hidden');
                 document.getElementById('successScreen').classList.add('hidden');
                 document.getElementById('adminScreen').classList.remove('hidden');
@@ -324,15 +347,15 @@
                 data.reverse().forEach((d, i) => {
                     let displayDetail = d.detail;
                     if(displayDetail.includes('http')) {
-                        displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" target="_blank" class="text-blue-500 underline hover:text-blue-700">Open Map 📍</a>`;
+                        displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" target="_blank" class="text-blue-500 underline">Open Map 📍</a>`;
                     }
-                    html += `<div class="p-4 bg-white/80 border border-pink-200 rounded-xl text-sm mb-3 shadow-sm hover:shadow-md transition-shadow">
+                    html += `<div class="p-4 bg-white/80 border border-pink-200 rounded-xl text-sm mb-3 shadow-sm">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-bold text-pink-600 uppercase tracking-wider">Date ${data.length - i}</span>
                             <span class="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full font-bold">${d.activity}</span>
                         </div>
-                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">Details:</span> <span class="text-gray-700">${displayDetail}</span> <br>
-                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">When:</span> <span class="text-gray-700">${d.date} at ${d.time}</span>
+                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">Pick:</span> <span class="text-gray-800">${displayDetail}</span> <br>
+                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">When:</span> <span class="text-gray-800">${d.date} at ${d.time}</span>
                     </div>`;
                 });
                 document.getElementById('adminData').innerHTML = html;
@@ -343,6 +366,7 @@
 
         function closeAdmin() {
             document.getElementById('adminScreen').classList.add('hidden');
+            // Go back to main app (assuming they already passed the prank if they are in dashboard)
             document.getElementById('mainApp').classList.remove('hidden');
         }
 
