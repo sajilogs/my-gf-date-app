@@ -141,7 +141,6 @@
         const noBtn = document.getElementById('noBtn');
         
         function moveNoButton() {
-            // Get screen bounds safely
             const maxX = window.innerWidth - noBtn.offsetWidth - 20;
             const maxY = window.innerHeight - noBtn.offsetHeight - 20;
             
@@ -153,7 +152,6 @@
             noBtn.style.top = randomY + 'px';
         }
 
-        // Works for mouse and touch screens
         noBtn.addEventListener('mouseover', moveNoButton);
         noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); moveNoButton(); });
         noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNoButton(); });
@@ -161,7 +159,6 @@
         function acceptDate() {
             document.getElementById('prankScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            // Trigger a mini celebration
             for(let i=0; i<15; i++) setTimeout(createHeart, i*100);
         }
 
@@ -224,7 +221,7 @@
                         if(mapMarker) { map.removeLayer(mapMarker); }
                         mapMarker = L.marker(e.latlng).addTo(map);
                         
-                        selection.detail = `Map Pin: https://www.google.com/maps?q=${e.latlng.lat},${e.latlng.lng}`;
+                        selection.detail = `https://www.google.com/maps?q=${e.latlng.lat},${e.latlng.lng}`;
                         
                         const status = document.getElementById('map-status');
                         status.innerText = "📍 Location locked in!";
@@ -285,24 +282,15 @@
             const dateObj = new Date(selection.date);
             const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // SIMPLIFIED PLAIN-TEXT HTML TO BYPASS EMAIL FILTERS
-            const emailHTML = `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2 style="color: #e91e63;">❤️ You have a new Date Request! ❤️</h2>
-                    <br>
-                    <p><b>Activity:</b> ${selection.activity}</p>
-                    <p><b>Details / Location / Craving:</b> ${selection.detail}</p>
-                    <p><b>Date:</b> ${formattedDate}</p>
-                    <p><b>Time:</b> ${selection.time}</p>
-                    <br>
-                    <p>Have fun you two!</p>
-                </div>
-            `;
-
+            // FIX: Sending individual fields instead of a custom HTML message block.
+            // Web3Forms will automatically show these in your dashboard columns!
             const payload = {
                 access_key: accessKey,
                 subject: "❤️ Date Planned: " + selection.activity,
-                message: emailHTML
+                Activity: selection.activity,
+                Details: selection.detail,
+                Date: formattedDate,
+                Time: selection.time
             };
 
             fetch('https://api.web3forms.com/submit', {
@@ -347,7 +335,7 @@
                 data.reverse().forEach((d, i) => {
                     let displayDetail = d.detail;
                     if(displayDetail.includes('http')) {
-                        displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" target="_blank" class="text-blue-500 underline">Open Map 📍</a>`;
+                        displayDetail = `<a href="${displayDetail}" target="_blank" class="text-blue-500 underline">Open Map 📍</a>`;
                     }
                     html += `<div class="p-4 bg-white/80 border border-pink-200 rounded-xl text-sm mb-3 shadow-sm">
                         <div class="flex justify-between items-center mb-1">
@@ -366,7 +354,6 @@
 
         function closeAdmin() {
             document.getElementById('adminScreen').classList.add('hidden');
-            // Go back to main app (assuming they already passed the prank if they are in dashboard)
             document.getElementById('mainApp').classList.remove('hidden');
         }
 
