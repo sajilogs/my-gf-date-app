@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fce7f3 0%, #fee2e2 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        .font-cursive {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Floating Hearts Animation */
+        .heart-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            bottom: -50px;
+            font-size: 1.5rem;
+            animation: floatUp 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0.5) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-120vh) scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Screen Transitions */
+        .screen {
+            display: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        .screen.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Selectable Card Styles */
+        .choice-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(251, 113, 133, 0.2);
+        }
+
+        .choice-card.selected {
+            border-color: #fb7185;
+            background-color: #fff1f2;
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px -1px rgba(251, 113, 133, 0.3);
+        }
+        
+        input[type="datetime-local"] {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #fb7185;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800 relative">
+
+    <div class="heart-container" id="hearts-bg"></div>
+
+    <main class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+        
+        <div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-3xl w-full max-w-md p-6 sm:p-8 border border-pink-100 overflow-hidden relative">
+            
+            <!-- 1. LANDING SCREEN -->
+            <div id="screen-home" class="screen active flex-col items-center text-center py-10">
+                <div class="w-24 h-24 bg-rose-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                    <span class="text-5xl">💝</span>
+                </div>
+                <h1 class="font-cursive text-5xl text-rose-500 mb-4 tracking-wide">Hello Beautiful</h1>
+                <p class="text-gray-600 mb-10 text-lg leading-relaxed">
+                    You mean the absolute world to me. I love you more than words can say...<br><br>
+                    I put together a little something for us. Are you ready?
+                </p>
+                <button onclick="goToPlanner()" class="bg-gradient-to-r from-rose-400 to-pink-500 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 w-full text-lg animate-pulse">
+                    Let's Plan a Date! ✨
+                </button>
+
+                <!-- Hidden Admin Button -->
+                <button onclick="promptAdmin()" class="absolute bottom-2 right-2 opacity-10 hover:opacity-50 text-xs p-2 rounded transition-opacity">
+                    🔒
+                </button>
+            </div>
+
+            <!-- 2. PLANNER SCREEN -->
+            <div id="screen-planner" class="screen flex-col w-full h-[80vh] sm:h-auto overflow-y-auto pb-4" style="scrollbar-width: none;">
+                <div class="text-center mb-6 sticky top-0 bg-white/95 pb-3 z-10 pt-2 border-b border-pink-50">
+                    <h2 class="font-cursive text-4xl text-rose-500">Our Perfect Date</h2>
+                    <p class="text-xs text-gray-400 mt-1">Design our next adventure together</p>
+                </div>
+
+                <div class="space-y-8 px-1">
+                    
+                    <!-- Activity Selection -->
+                    <div>
+                        <h3 class="font-medium text-rose-800 mb-3 text-sm uppercase tracking-wider">1. What are we doing?</h3>
+                        <div class="grid grid-cols-2 gap-3" id="activity-options">
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('activity', 'Fancy Dinner', this)">
+                                <span class="text-3xl block mb-2">🍽️</span>
+                                <span class="text-sm font-medium">Fancy Dinner</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('activity', 'Movie Night', this)">
+                                <span class="text-3xl block mb-2">🍿</span>
+                                <span class="text-sm font-medium">Movie Night</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('activity', 'Cute Picnic', this)">
+                                <span class="text-3xl block mb-2">🧺</span>
+                                <span class="text-sm font-medium">Cute Picnic</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('activity', 'Cozy Night In', this)">
+                                <span class="text-3xl block mb-2">🛋️</span>
+                                <span class="text-sm font-medium">Cozy Night In</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Food Selection -->
+                    <div>
+                        <h3 class="font-medium text-rose-800 mb-3 text-sm uppercase tracking-wider">2. What are we eating?</h3>
+                        <div class="grid grid-cols-2 gap-3" id="food-options">
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('food', 'Italian / Pasta', this)">
+                                <span class="text-3xl block mb-2">🍝</span>
+                                <span class="text-sm font-medium">Italian</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('food', 'Sushi', this)">
+                                <span class="text-3xl block mb-2">🍣</span>
+                                <span class="text-sm font-medium">Sushi</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('food', 'Pizza or Burgers', this)">
+                                <span class="text-3xl block mb-2">🍕</span>
+                                <span class="text-sm font-medium">Pizza/Burgers</span>
+                            </div>
+                            <div class="choice-card bg-gray-50 rounded-xl p-4 text-center" onclick="selectOption('food', 'Dessert & Coffee', this)">
+                                <span class="text-3xl block mb-2">🍰</span>
+                                <span class="text-sm font-medium">Dessert</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Selection -->
+                    <div>
+                        <h3 class="font-medium text-rose-800 mb-3 text-sm uppercase tracking-wider">3. When are we going?</h3>
+                        <input type="datetime-local" id="date-time" class="w-full bg-gray-50 border-2 border-transparent focus:border-rose-300 focus:bg-white rounded-xl p-4 text-gray-700 outline-none transition-all cursor-pointer" required>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button onclick="submitDate()" id="confirm-btn" class="flex items-center justify-center gap-2 bg-gray-300 text-gray-500 font-semibold py-4 px-8 rounded-full w-full text-lg transition-all duration-300 pointer-events-none cursor-not-allowed">
+                            <span id="btn-text">Fill details to Confirm</span>
+                            <div id="btn-loader" class="loader hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. SUCCESS SCREEN -->
+            <div id="screen-success" class="screen flex-col items-center text-center py-8">
+                <div class="w-32 h-32 mb-6 relative">
+                    <div class="absolute inset-0 bg-pink-200 rounded-full animate-ping opacity-50"></div>
+                    <div class="relative bg-white rounded-full w-full h-full flex items-center justify-center shadow-xl z-10 text-6xl border-4 border-pink-100">
+                        🎉
+                    </div>
+                </div>
+                
+                <h2 class="font-cursive text-5xl text-rose-500 mb-4">It's a Date!</h2>
+                
+                <div class="bg-rose-50 rounded-2xl p-6 w-full mb-8 border border-rose-100 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-300 to-pink-400"></div>
+                    <p class="text-gray-700 font-medium mb-2">I've received your answers! ❤️</p>
+                    <p id="summary-text" class="text-rose-600 text-sm font-semibold leading-relaxed">
+                        <!-- Filled by JS -->
+                    </p>
+                </div>
+
+                <p class="text-gray-500 text-sm italic">I can't wait. Love you!</p>
+            </div>
+
+            <!-- 4. ADMIN DASHBOARD (HIDDEN) -->
+            <div id="screen-admin" class="screen flex-col w-full h-[80vh] sm:h-auto overflow-y-auto pb-4" style="scrollbar-width: none;">
+                <div class="flex justify-between items-center mb-6 sticky top-0 bg-white/95 pb-3 z-10 pt-2 border-b border-pink-50">
+                    <h2 class="font-bold text-xl text-gray-800">Secret Dashboard 🤫</h2>
+                    <button onclick="showScreen('screen-home')" class="text-sm bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200">Back</button>
+                </div>
+                
+                <div id="admin-loader" class="flex justify-center py-10 hidden">
+                    <div class="loader !border-gray-300 !border-t-rose-500 w-8 h-8"></div>
+                </div>
+
+                <div id="admin-results" class="space-y-4">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div id="admin-empty" class="text-center py-10 hidden">
+                    <span class="text-4xl mb-3 block">📭</span>
+                    <p class="text-gray-500 text-sm">She hasn't submitted a date yet.<br>Give her the link!</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global state for easy access in non-module scripts
+        window.datePlannerApp = {
+            db: null,
+            appId: typeof __app_id !== 'undefined' ? __app_id : 'date-planner-app',
+            isAuthenticated: false
+        };
+
+        // Initialize Firebase
+        async function initFirebase() {
+            try {
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                    // Fallback mock config for local testing if env vars missing
+                    projectId: "mock-project"
+                };
+                
+                const app = initializeApp(firebaseConfig);
+                window.datePlannerApp.db = getFirestore(app);
+                const auth = getAuth(app);
+
+                // Authenticate
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                window.datePlannerApp.isAuthenticated = true;
+                console.log("Firebase authenticated successfully");
+            } catch (error) {
+                console.error("Firebase init failed:", error);
+                // Fallback for visual testing without firebase
+                window.datePlannerApp.isAuthenticated = true; 
+            }
+        }
+
+        initFirebase();
+        
+        // Expose Firebase functions to global scope for the inline handlers
+        window.saveDateToFirebase = async function(dateData) {
+            if (!window.datePlannerApp.isAuthenticated || !window.datePlannerApp.db) return false;
+            
+            try {
+                const datesRef = collection(window.datePlannerApp.db, 'artifacts', window.datePlannerApp.appId, 'public', 'data', 'date_plans');
+                await addDoc(datesRef, {
+                    ...dateData,
+                    timestamp: serverTimestamp()
+                });
+                return true;
+            } catch (error) {
+                console.error("Error saving date:", error);
+                return false;
+            }
+        };
+
+        window.fetchDatesFromFirebase = async function() {
+            if (!window.datePlannerApp.isAuthenticated || !window.datePlannerApp.db) return [];
+            
+            try {
+                const datesRef = collection(window.datePlannerApp.db, 'artifacts', window.datePlannerApp.appId, 'public', 'data', 'date_plans');
+                // No complex ordering per instructions, fetch all and sort in JS
+                const snapshot = await getDocs(datesRef);
+                const results = [];
+                snapshot.forEach(doc => {
+                    results.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort locally by timestamp descending
+                return results.sort((a, b) => {
+                    const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+                    const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+                    return timeB - timeA;
+                });
+            } catch (error) {
+                console.error("Error fetching dates:", error);
+                return [];
+            }
+        };
+    </script>
+
+    <script>
+        // State management
+        const dateState = {
+            activity: null,
+            food: null,
+            time: null
+        };
+
+        // --- Animations ---
+        function createFloatingHeart() {
+            const container = document.getElementById('hearts-bg');
+            if(!container) return;
+            
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            
+            const symbols = ['❤️', '💖', '💕', '✨', '🌸'];
+            heart.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            heart.style.left = Math.random() * 100 + 'vw';
+            const size = Math.random() * 0.5 + 1; 
+            heart.style.transform = `scale(${size})`;
+            const duration = Math.random() * 4 + 6; 
+            heart.style.animationDuration = `${duration}s`;
+
+            container.appendChild(heart);
+            setTimeout(() => heart.remove(), duration * 1000);
+        }
+
+        setInterval(createFloatingHeart, 800);
+        for(let i=0; i<5; i++) setTimeout(createFloatingHeart, i*200);
+
+        // --- Navigation & UI Logic ---
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function goToPlanner() {
+            showScreen('screen-planner');
+        }
+
+        function selectOption(category, value, element) {
+            dateState[category] = value;
+
+            const parent = element.parentElement;
+            const children = parent.children;
+            for (let i = 0; i < children.length; i++) {
+                children[i].classList.remove('selected');
+            }
+            element.classList.add('selected');
+
+            checkFormCompletion();
+        }
+
+        document.getElementById('date-time').addEventListener('change', function(e) {
+            dateState.time = e.target.value;
+            checkFormCompletion();
+        });
+
+        function checkFormCompletion() {
+            const btn = document.getElementById('confirm-btn');
+            if (dateState.activity && dateState.food && dateState.time) {
+                btn.classList.remove('bg-gray-300', 'text-gray-500', 'pointer-events-none', 'cursor-not-allowed');
+                btn.classList.add('bg-gradient-to-r', 'from-rose-400', 'to-pink-500', 'text-white', 'shadow-lg', 'hover:shadow-xl', 'hover:scale-105', 'cursor-pointer');
+                document.getElementById('btn-text').innerText = "Confirm Date! 💖";
+            }
+        }
+
+        async function submitDate() {
+            if (!dateState.activity || !dateState.food || !dateState.time) return;
+
+            // UI Loading state
+            const btnText = document.getElementById('btn-text');
+            const btnLoader = document.getElementById('btn-loader');
+            const confirmBtn = document.getElementById('confirm-btn');
+            
+            btnText.innerText = "Saving...";
+            btnLoader.classList.remove('hidden');
+            confirmBtn.classList.add('pointer-events-none', 'opacity-80');
+
+            // Format date string nicely for the display
+            const dateObj = new Date(dateState.time);
+            const options = { weekday: 'long', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+            const formattedDate = dateObj.toLocaleDateString('en-US', options);
+            const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit'});
+
+            // Save to Database
+            if (window.saveDateToFirebase) {
+                await window.saveDateToFirebase({
+                    activity: dateState.activity,
+                    food: dateState.food,
+                    rawDateTime: dateState.time,
+                    formattedDate: formattedDate
+                });
+            } else {
+                // Fallback simulation
+                await new Promise(r => setTimeout(r, 1000));
+            }
+
+            // Generate summary text for success screen
+            const summaryText = `Get ready for ${dateState.activity} with some delicious ${dateState.food} on ${formattedDate}.`;
+            document.getElementById('summary-text').innerText = summaryText;
+
+            // Big heart blast
+            for(let i=0; i<30; i++) setTimeout(createFloatingHeart, i * 50);
+
+            showScreen('screen-success');
+        }
+
+        function promptAdmin() {
+            // Using a simple custom prompt modal to avoid raw `prompt()` 
+            // but for simplicity in this sandbox, a quick check against 'admin'
+            const pwd = window.prompt("Enter secret code to view answers:");
+            if (pwd === "admin") {
+                openAdmin();
+            } else if (pwd !== null) {
+                // Ignore if they click cancel, otherwise inform wrong pass but we don't want alerts.
+            }
+        }
+
+        async function openAdmin() {
+            showScreen('screen-admin');
+            
+            const loader = document.getElementById('admin-loader');
+            const resultsContainer = document.getElementById('admin-results');
+            const emptyState = document.getElementById('admin-empty');
+            
+            resultsContainer.innerHTML = '';
+            emptyState.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            if (window.fetchDatesFromFirebase) {
+                const dates = await window.fetchDatesFromFirebase();
+                loader.classList.add('hidden');
+
+                if (dates.length === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    dates.forEach((date, index) => {
+                        const card = document.createElement('div');
+                        card.className = "bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden";
+                        
+                        // Formatting the submission time if it exists
+                        let submittedAt = 'Just now';
+                        if (date.timestamp && typeof date.timestamp.toDate === 'function') {
+                            submittedAt = date.timestamp.toDate().toLocaleString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+                        }
+
+                        card.innerHTML = `
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-400"></div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs text-gray-400 font-medium">Date Idea #${dates.length - index}</span>
+                                <span class="text-[10px] text-gray-300 bg-gray-50 px-2 py-1 rounded">${submittedAt}</span>
+                            </div>
+                            <p class="text-gray-800 text-sm mb-1"><span class="font-semibold text-rose-500">Activity:</span> ${date.activity}</p>
+                            <p class="text-gray-800 text-sm mb-1"><span class="font-semibold text-rose-500">Food:</span> ${date.food}</p>
+                            <p class="text-gray-800 text-sm"><span class="font-semibold text-rose-500">When:</span> ${date.formattedDate}</p>
+                        `;
+                        resultsContainer.appendChild(card);
+                    });
+                }
+            } else {
+                loader.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
