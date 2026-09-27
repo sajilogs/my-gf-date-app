@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
+    <!-- LEAFLET MAPS CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
         /* Animated Gradient Background */
         body {
@@ -29,7 +33,7 @@
         
         /* Glassmorphism Card */
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -50,13 +54,8 @@
         }
         
         /* Custom Button Glow */
-        .btn-glow {
-            transition: all 0.3s ease;
-        }
-        .btn-glow:hover:not(:disabled) {
-            box-shadow: 0 0 20px rgba(244, 114, 182, 0.6);
-            transform: translateY(-2px);
-        }
+        .btn-glow { transition: all 0.3s ease; }
+        .btn-glow:hover:not(:disabled) { box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); transform: translateY(-2px); }
     </style>
 </head>
 <body class="flex items-center justify-center p-4 relative">
@@ -113,12 +112,26 @@
     <div id="successScreen" class="hidden glass-card p-10 rounded-3xl w-full max-w-md text-center z-10 transition-all duration-500">
         <div class="text-7xl mb-4 animate-bounce">💖</div>
         <h2 class="text-4xl font-cursive text-pink-600 mb-3">I can't wait!</h2>
-        <p class="text-gray-700 font-medium mb-6">Your date request has been sent straight to my heart (and my phone)! See you then, beautiful! ✨</p>
+        <p class="text-gray-700 font-medium mb-6">Your date request has been sent straight to my heart (and my email)! See you then, beautiful! ✨</p>
         <div id="summaryText" class="text-sm font-semibold text-pink-700 bg-pink-100/80 p-4 rounded-xl border border-pink-300 shadow-sm"></div>
     </div>
 
+    <!-- ADMIN DASHBOARD -->
+    <div id="adminScreen" class="hidden glass-card p-8 rounded-3xl w-full max-w-md z-10 transition-all duration-500">
+        <h2 class="text-2xl font-bold text-pink-600 mb-4 flex justify-between items-center border-b border-pink-200 pb-2">
+            <span>🔒 Secret Dashboard</span>
+            <button onclick="closeAdmin()" class="text-sm text-gray-500 hover:text-pink-500 font-medium bg-white px-3 py-1 rounded-full border border-pink-100 shadow-sm">Close</button>
+        </h2>
+        <div id="adminData" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2"></div>
+    </div>
+
+    <!-- Admin Lock Icon -->
+    <div class="fixed bottom-3 right-3 text-2xl opacity-20 hover:opacity-100 cursor-pointer p-2 z-50 transition-opacity duration-300" onclick="openAdmin()">🔒</div>
+
     <script>
         let selection = { activity: '', detail: '', date: '', time: '' };
+        let map;
+        let mapMarker;
 
         function selectActivity(act) {
             selection.activity = act;
@@ -133,8 +146,9 @@
             
             let html = '';
             if(act === 'Rides') {
-                html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide">Where are we riding to?</label>
-                        <input type="text" id="detailInput" onchange="updateDetail(this.value)" placeholder="e.g. Tagaytay, Nuvali, Coffee shop..." class="w-full mt-2 p-2.5 border border-pink-100 rounded-xl text-sm focus:ring-2 focus:ring-pink-300 outline-none">`;
+                html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">Drop a pin on where we are going! 📍</label>
+                        <div id="map" class="border-2 border-pink-200 shadow-sm" style="height: 220px; width: 100%; border-radius: 12px; z-index: 1;"></div>
+                        <p id="map-status" class="text-xs text-gray-500 mt-3 text-center font-medium">Drag and click to drop a pin.</p>`;
                 document.getElementById('timeLabel').innerText = "Time";
             } else if(act === 'Overnight') {
                 html = `<div class="flex flex-col items-center justify-center p-2">
@@ -146,33 +160,65 @@
             } else if(act === 'Visit') {
                 html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">Whose house?</label>
                         <div class="flex gap-3">
-                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors">My House 👱‍♂️</button>
-                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors">Your House 👩</button>
+                            <button onclick="updateDetail('My House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors bg-white/50">My House 👱‍♂️</button>
+                            <button onclick="updateDetail('Her House')" class="detail-btn flex-1 py-2.5 border border-pink-200 rounded-xl text-sm font-medium hover:bg-pink-50 transition-colors bg-white/50">Your House 👩</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             } else if(act === 'Eat') {
                 html = `<label class="text-xs font-bold text-pink-500 uppercase tracking-wide mb-2 block">What are you craving?</label>
                         <div class="grid grid-cols-2 gap-2.5 text-sm">
-                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍢 Streetfoods</button>
-                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🥓 Samgyup</button>
-                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍕 Pizza & Fries</button>
-                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors">🍦 Ice Cream</button>
+                            <button onclick="updateDetail('Streetfoods')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍢 Streetfoods</button>
+                            <button onclick="updateDetail('Samgyup')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🥓 Samgyup</button>
+                            <button onclick="updateDetail('Pizza & Fries')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍕 Pizza & Fries</button>
+                            <button onclick="updateDetail('Ice Cream')" class="detail-btn py-2 border border-pink-200 rounded-xl font-medium hover:bg-pink-50 transition-colors bg-white/50">🍦 Ice Cream</button>
                         </div>`;
                 document.getElementById('timeLabel').innerText = "Time";
             }
+            
             dyn.innerHTML = html;
+
+            // MAP INITIALIZATION LOGIC
+            if(act === 'Rides') {
+                setTimeout(() => {
+                    if(map) { map.remove(); }
+                    // Centered near Calabarzon, Philippines
+                    map = L.map('map').setView([14.18, 121.28], 10);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                    
+                    map.on('click', function(e) {
+                        if(mapMarker) { map.removeLayer(mapMarker); }
+                        mapMarker = L.marker(e.latlng).addTo(map);
+                        
+                        // Generate Google Maps Link for you
+                        selection.detail = `Map Pin: https://www.google.com/maps?q=${e.latlng.lat},${e.latlng.lng}`;
+                        
+                        const status = document.getElementById('map-status');
+                        status.innerText = "📍 Location locked in!";
+                        status.classList.remove('text-gray-500');
+                        status.classList.add('text-pink-600', 'font-bold');
+                        
+                        checkReady();
+                    });
+                    
+                    // Crucial fix: forces the map to render inside the dynamic div
+                    map.invalidateSize(); 
+                }, 150);
+            }
+
             checkReady();
         }
 
         function updateDetail(val) {
             selection.detail = val;
             document.querySelectorAll('.detail-btn').forEach(btn => {
-                btn.classList.remove('bg-pink-100', 'border-pink-400', 'text-pink-700');
-                btn.classList.add('border-pink-200');
+                btn.classList.remove('bg-pink-100', 'border-pink-400', 'text-pink-700', 'shadow-sm');
+                btn.classList.add('border-pink-200', 'bg-white/50');
             });
             if(event && event.target.classList.contains('detail-btn')) {
-                event.target.classList.remove('border-pink-200');
-                event.target.classList.add('bg-pink-100', 'border-pink-400', 'text-pink-700');
+                event.target.classList.remove('border-pink-200', 'bg-white/50');
+                event.target.classList.add('bg-pink-100', 'border-pink-400', 'text-pink-700', 'shadow-sm');
             }
             checkReady();
         }
@@ -201,22 +247,30 @@
             btn.innerText = "Sending to my heart... 💌";
             btn.disabled = true;
 
-            const accessKey = "aec85106-f4df-4783-a23f-35825e916a5f"; 
+            // SAVE TO LOCAL DASHBOARD
+            let savedDates = JSON.parse(localStorage.getItem('my_gf_dates') || '[]');
+            savedDates.push(selection);
+            localStorage.setItem('my_gf_dates', JSON.stringify(savedDates));
 
-            // Format date to look nicer in the email
+            const accessKey = "aec85106-f4df-4783-a23f-35825e916a5f"; 
             const dateObj = new Date(selection.date);
             const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Create a nice HTML template for the email you receive
+            // Create clickable link in email if it's a map pin
+            let displayDetail = selection.detail;
+            if(displayDetail.includes('http')) {
+                displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" style="color: #3b82f6;">Open in Google Maps</a>`;
+            }
+
             const emailHTML = `
                 <div style="font-family: sans-serif; padding: 20px; background-color: #fdf2f8; border-radius: 10px;">
                     <h2 style="color: #db2777;">❤️ You have a new Date Request! ❤️</h2>
                     <p style="font-size: 16px; color: #4b5563;">Your beautiful girlfriend just planned a date for you:</p>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Activity</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.activity}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Details</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.detail}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Date</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${formattedDate}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Time</td><td style="padding: 10px; border-bottom: 1px solid #fbcfe8;">${selection.time}</td></tr>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 8px; overflow: hidden;">
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Activity</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${selection.activity}</td></tr>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Details / Location</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${displayDetail}</td></tr>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Date</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${formattedDate}</td></tr>
+                        <tr><td style="padding: 12px; border-bottom: 1px solid #fbcfe8; font-weight: bold; color: #ec4899;">Time</td><td style="padding: 12px; border-bottom: 1px solid #fbcfe8;">${selection.time}</td></tr>
                     </table>
                     <p style="margin-top: 20px; color: #db2777; font-style: italic;">Have a great time!</p>
                 </div>
@@ -224,39 +278,75 @@
 
             const payload = {
                 access_key: accessKey,
-                subject: "❤️ Date Planned: " + selection.activity + " on " + selection.date,
+                subject: "❤️ Date Planned: " + selection.activity,
                 message: emailHTML
             };
 
             fetch('https://api.web3forms.com/submit', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify(payload)
-            })
-            .then(async (response) => {
+            }).then(async (response) => {
                 if (response.status === 200) {
                     document.getElementById('mainApp').classList.add('hidden');
                     document.getElementById('successScreen').classList.remove('hidden');
-                    document.getElementById('summaryText').innerHTML = `Get ready for <b>${selection.activity}</b> (${selection.detail}) <br>on <b>${formattedDate}</b> at <b>${selection.time}</b>!`;
                     
-                    // Trigger massive heart burst
+                    let uiDisplayDetail = selection.detail;
+                    if(uiDisplayDetail.includes('http')) uiDisplayDetail = "A secret mapped location";
+                    
+                    document.getElementById('summaryText').innerHTML = `Get ready for <b>${selection.activity}</b> <br> (${uiDisplayDetail}) <br>on <b>${formattedDate}</b> at <b>${selection.time}</b>!`;
+                    
                     for(let i=0; i<60; i++) setTimeout(createHeart, i*40);
                 } else {
                     alert("Oops! The love letters got lost in the mail. Try again!");
                     btn.innerText = "Confirm Our Date! 💖";
                     btn.disabled = false;
                 }
-            })
-            .catch(error => {
+            }).catch(error => {
                 alert("Error sending email. Check your internet!");
                 btn.innerText = "Confirm Our Date! 💖";
                 btn.disabled = false;
             });
         }
 
+        // DASHBOARD FUNCTIONS
+        function openAdmin() {
+            let pass = prompt("Enter dashboard password:");
+            if(pass === "admin") {
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('successScreen').classList.add('hidden');
+                document.getElementById('adminScreen').classList.remove('hidden');
+                
+                let data = JSON.parse(localStorage.getItem('my_gf_dates') || '[]');
+                let html = '';
+                if(data.length === 0) html = '<div class="p-4 bg-white/60 rounded-xl text-center text-gray-500 font-medium">No dates saved on this device yet!</div>';
+                
+                data.reverse().forEach((d, i) => {
+                    let displayDetail = d.detail;
+                    if(displayDetail.includes('http')) {
+                        displayDetail = `<a href="${displayDetail.replace('Map Pin: ', '')}" target="_blank" class="text-blue-500 underline hover:text-blue-700">Open Map 📍</a>`;
+                    }
+                    html += `<div class="p-4 bg-white/80 border border-pink-200 rounded-xl text-sm mb-3 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-pink-600 uppercase tracking-wider">Date ${data.length - i}</span>
+                            <span class="text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full font-bold">${d.activity}</span>
+                        </div>
+                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">Details:</span> <span class="text-gray-700">${displayDetail}</span> <br>
+                        <span class="font-bold text-gray-500 text-xs uppercase tracking-wide">When:</span> <span class="text-gray-700">${d.date} at ${d.time}</span>
+                    </div>`;
+                });
+                document.getElementById('adminData').innerHTML = html;
+            } else if (pass) {
+                alert("Incorrect password!");
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+        }
+
+        // HEARTS ANIMATION
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
@@ -267,8 +357,6 @@
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 5000);
         }
-        
-        // Spawn occasional background hearts
         setInterval(createHeart, 1200);
     </script>
 </body>
