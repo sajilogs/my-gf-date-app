@@ -54,14 +54,14 @@
         .btn-glow { transition: all 0.3s ease; }
         .btn-glow:hover:not(:disabled) { box-shadow: 0 0 20px rgba(244, 114, 182, 0.6); transform: translateY(-2px); }
 
-        /* Smoother, faster transition for running away */
-        #noBtn { transition: top 0.15s ease-out, left 0.15s ease-out; z-index: 9999; }
+        /* Smoother transition for running away */
+        #noBtn { transition: top 0.15s ease-out, left 0.15s ease-out; z-index: 100; }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4 relative min-h-screen">
 
-    <!-- PRANK SCREEN -->
-    <div id="prankScreen" class="glass-card p-10 rounded-3xl w-full max-w-sm text-center z-20">
+    <!-- PRANK SCREEN (Added 'relative' class here so the button stays inside!) -->
+    <div id="prankScreen" class="glass-card p-10 rounded-3xl w-full max-w-sm text-center z-20 relative">
         <div class="text-6xl mb-4 animate-bounce">🥺</div>
         <h1 class="text-3xl font-cursive text-pink-600 mb-8">Will you go on a date with me?</h1>
         
@@ -137,33 +137,34 @@
     <div class="fixed bottom-3 right-3 text-2xl opacity-20 hover:opacity-100 cursor-pointer p-2 z-50" onclick="openAdmin()">🔒</div>
 
     <script>
-        // PRANK LOGIC - The "No" button physically runs away
+        // PRANK LOGIC - The "No" button frantically bounces around inside the card
         const noBtn = document.getElementById('noBtn');
+        const prankScreen = document.getElementById('prankScreen');
         
         function moveNoButton() {
-            // Get viewport dimensions
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
+            // Get dimensions of the card container
+            const containerWidth = prankScreen.clientWidth;
+            const containerHeight = prankScreen.clientHeight;
             
             // Get button dimensions
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             
-            // Calculate safe boundaries so it doesn't go off screen
-            const maxX = viewportWidth - btnWidth - 20; 
-            const maxY = viewportHeight - btnHeight - 20;
+            // Calculate boundaries so it stays strictly inside the white card
+            const maxX = containerWidth - btnWidth - 20; 
+            const maxY = containerHeight - btnHeight - 20;
             
-            // Generate random position within safe bounds
+            // Generate random position within the card bounds
             const randomX = Math.max(10, Math.floor(Math.random() * maxX));
             const randomY = Math.max(10, Math.floor(Math.random() * maxY));
             
-            // Apply new position
-            noBtn.style.position = 'fixed';
+            // Apply new absolute position relative to the card
+            noBtn.style.position = 'absolute';
             noBtn.style.left = randomX + 'px';
             noBtn.style.top = randomY + 'px';
         }
 
-        // Trigger on both mouse over and click (for fast clickers)
+        // Trigger on both mouse enter and click (for fast clickers)
         noBtn.addEventListener('mouseenter', moveNoButton);
         noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNoButton(); });
         // For mobile/touch users
